@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Hello Kitty Scientific Calculator</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #ffe6f0;
+    font-family: Arial, sans-serif;
+    transition: 0.3s;
+}
+
+body.dark {
+    background: #18151a;
+}
+
+.calculator {
+    width: 420px;
+    max-width: 95%;
+    padding: 18px;
+    border-radius: 25px;
+    background: #ffd5e3;
+    border: 3px solid #ff4f9a;
+    box-shadow: 0 12px 35px rgba(200, 40, 120, 0.25);
+}
+
+body.dark .calculator {
+    background: #29242b;
+    border-color: #ff70ad;
+}
+
+.title {
+    text-align: center;
+    font-size: 26px;
+    font-weight: bold;
+    color: #e91e83;
+    background: white;
+    padding: 12px;
+    border-radius: 15px;
+    margin-bottom: 10px;
+}
+
+body.dark .title {
+    background: #403941;
+    color: #ff8fbe;
+}
+
+#dateTime {
+    text-align: center;
+    font-size: 12px;
+    color: #b50067;
+    margin-bottom: 8px;
+}
+
+body.dark #dateTime {
+    color: #ffb0ce;
+}
+
+#display {
+    width: 100%;
+    height: 65px;
+    border: 3px solid #ff75b5;
+    border-radius: 12px;
+    background: white;
+    color: #b50067;
+    font-size: 27px;
+    text-align: right;
+    padding: 10px;
+    outline: none;
+    margin-bottom: 12px;
+}
+
+body.dark #display {
+    background: #18151a;
+    color: #ffffff;
+    border-color: #ff70ad;
+}
+
+.memory {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 7px;
+    margin-bottom: 10px;
+}
+
+.memory button {
+    height: 35px;
+    font-size: 13px;
+}
+
+.buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 9px;
+}
+
+button {
+    height: 54px;
+    border: 2px solid #ff5ca8;
+    border-radius: 10px;
+    background: #ffb6cc;
+    color: #b50067;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.15s;
+}
+
+button:hover {
+    background: #ff8fba;
+    transform: scale(1.03);
+}
+
+button:active {
+    transform: scale(0.96);
+}
+
+.operator {
+    background: #ff9fbe;
+}
+
+.special {
+    background: #ffc5d9;
+}
+
+.clear {
+    background: #ff6fa7;
+    color: white;
+}
+
+.equals {
+    background: #ff70ad;
+    color: white;
+}
+
+.menu {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.menu button {
+    height: 42px;
+    font-size: 14px;
+}
+
+.scientific {
+    display: none;
+    margin-top: 10px;
+}
+
+.scientific.active {
+    display: block;
+}
+
+.scientific-title {
+    text-align: center;
+    font-weight: bold;
+    color: #d41472;
+    margin: 10px 0;
+}
+
+.scientific-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 9px;
+}
+
+.history {
+    display: none;
+    margin-top: 12px;
+    background: white;
+    border-radius: 12px;
+    padding: 10px;
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.history.active {
+    display: block;
+}
+
+body.dark .history {
+    background: #18151a;
+    color: white;
+}
+
+.history h3 {
+    margin: 0 0 8px;
+    color: #d41472;
+}
+
+.history-item {
+    padding: 5px;
+    border-bottom: 1px solid #ffb6cc;
+    font-size: 13px;
+}
+
+.footer {
+    text-align: center;
+    color: #c21875;
+    font-size: 11px;
+    margin-top: 10px;
+}
+
+body.dark .footer {
+    color: #ffb0ce;
+}
+
+@media (max-width: 500px) {
+
+    .calculator {
+        width: 95%;
+        padding: 12px;
+    }
+
+    button {
+        height: 50px;
+        font-size: 15px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="calculator">
+
+    <div class="title">
+        🎀 Hello Kitty Scientific Calculator 🎀
+    </div>
+
+    <div id="dateTime"></div>
+
+    <input type="text" id="display" readonly>
+
+    <!-- MEMORY -->
+
+    <div class="memory">
+
+        <button onclick="memoryClear()">MC</button>
+        <button onclick="memoryRecall()">MR</button>
+        <button onclick="memoryAdd()">M+</button>
+        <button onclick="memorySubtract()">M-</button>
+
+    </div>
+
+    <!-- NORMAL CALCULATOR -->
+
+    <div class="buttons">
+
+        <button onclick="appendValue('7')">7</button>
+        <button onclick="appendValue('8')">8</button>
+        <button onclick="appendValue('9')">9</button>
+        <button class="clear" onclick="clearDisplay()">C</button>
+
+        <button onclick="appendValue('4')">4</button>
+        <button onclick="appendValue('5')">5</button>
+        <button onclick="appendValue('6')">6</button>
+        <button class="operator" onclick="appendValue('/')">÷</button>
+
+        <button onclick="appendValue('1')">1</button>
+        <button onclick="appendValue('2')">2</button>
+        <button onclick="appendValue('3')">3</button>
+        <button class="operator" onclick="appendValue('*')">×</button>
+
+        <button onclick="appendValue('0')">0</button>
+        <button onclick="appendValue('.')">.</button>
+        <button class="equals" onclick="calculate()">=</button>
+        <button class="operator" onclick="appendValue('-')">−</button>
+
+        <button class="operator" onclick="appendValue('+')">+</button>
+        <button class="special" onclick="percentage()">%</button>
+        <button class="special" onclick="toggleSign()">+/−</button>
+        <button class="special" onclick="deleteLast()">DEL</button>
+
+    </div>
+
+    <!-- SCIENTIFIC -->
+
+    <div id="scientific" class="scientific">
+
+        <div class="scientific-title">
+            🔬 Scientific Functions
+        </div>
+
+        <div class="scientific-grid">
+
+            <button onclick="squareRoot()">√</button>
+            <button onclick="square()">x²</button>
+            <button onclick="cube()">x³</button>
+            <button onclick="reciprocal()">1/x</button>
+
+            <button onclick="factorial()">n!</button>
+            <button onclick="trig('sin')">sin</button>
+            <button onclick="trig('cos')">cos</button>
+            <button onclick="trig('tan')">tan</button>
+
+            <button onclick="logValue()">log</button>
+            <button onclick="lnValue()">ln</button>
+            <button onclick="appendValue(Math.PI)">π</button>
+            <button onclick="appendValue(Math.E)">e</button>
+
+        </div>
+
+    </div>
+
+    <!-- MENU -->
+
+    <div class="menu">
+
+        <button onclick="toggleScientific()">
+            🔬 Scientific
+        </button>
+
+        <button onclick="toggleHistory()">
+            📜 History
+        </button>
+
+        <button onclick="toggleDarkMode()">
+            🌙 Dark Mode
+        </button>
+
+        <button onclick="saveHistory()">
+            💾 Save
+        </button>
+
+        <button onclick="showAbout()">
+            ℹ️ About
+        </button>
+
+        <button onclick="clearHistory()">
+            🗑 Clear History
+        </button>
+
+    </div>
+
+    <!-- HISTORY -->
+
+    <div id="history" class="history">
+
+        <h3>📜 Calculation History</h3>
+
+        <div id="historyList">
+            No calculations yet.
+        </div>
+
+    </div>
+
+    <div class="footer">
+        🎀 Hello Kitty Calculator | Java Project Web Version 🎀
+    </div>
+
+</div>
+
+<script>
+
+const display = document.getElementById("display");
+
+const historyList = document.getElementById("historyList");
+
+let history = [];
+
+let memory = 0;
+
+
+/* =========================
+   BASIC CALCULATOR
+========================= */
+
+function appendValue(value) {
+
+    display.value += value;
+
+}
+
+
+function clearDisplay() {
+
+    display.value = "";
+
+}
+
+
+function deleteLast() {
+
+    display.value = display.value.slice(0, -1);
+
+}
+
+
+function calculate() {
+
+    try {
+
+        if (display.value.trim() === "") {
+            return;
+        }
+
+        let expression = display.value;
+
+        let result = Function(
+            '"use strict"; return (' + expression + ')'
+        )();
+
+        if (!isFinite(result)) {
+
+            display.value = "Error";
+
+            return;
+        }
+
+        result = Number(result.toFixed(10));
+
+        addHistory(expression + " = " + result);
+
+        display.value = result;
+
+    }
+
+    catch {
+
+        display.value = "Error";
+
+    }
+
+}
+
+
+function percentage() {
+
+    let value = Number(display.value);
+
+    display.value = value / 100;
+
+}
+
+
+function toggleSign() {
+
+    let value = Number(display.value);
+
+    display.value = value * -1;
+
+}
+
+
+/* =========================
+   SCIENTIFIC
+========================= */
+
+function squareRoot() {
+
+    let value = Number(display.value);
+
+    if (value < 0) {
+
+        display.value = "Error";
+
+        return;
+
+    }
+
+    let result = Math.sqrt(value);
+
+    display.value = formatResult(result);
+
+    addHistory("√" + value + " = " + display.value);
+
+}
+
+
+function square() {
+
+    let value = Number(display.value);
+
+    let result = value * value;
+
+    display.value = formatResult(result);
+
+    addHistory(value + "² = " + display.value);
+
+}
+
+
+function cube() {
+
+    let value = Number(display.value);
+
+    let result = value * value * value;
+
+    display.value = formatResult(result);
+
+    addHistory(value + "³ = " + display.value);
+
+}
+
+
+function reciprocal() {
+
+    let value = Number(display.value);
+
+    if (value === 0) {
+
+        display.value = "Error";
+
+        return;
+
+    }
+
+    let result = 1 / value;
+
+    display.value = formatResult(result);
+
+    addHistory("1/" + value + " = " + display.value);
+
+}
+
+
+function factorial() {
+
+    let value = Number(display.value);
+
+    if (value < 0 || !Number.isInteger(value)) {
+
+        display.value = "Error";
+
+        return;
+
+    }
+
+    let result = 1;
+
+    for (let i = 1; i <= value; i++) {
+
+        result *= i;
+
+    }
+
+    display.value = result;
+
+    addHistory(value + "! = " + result);
+
+}
+
+
+function trig(type) {
+
+    let value = Number(display.value);
+
+    let radians = value * Math.PI / 180;
+
+    let result;
+
+    if (type === "sin") {
+
+        result = Math.sin(radians);
+
+    }
+
+    else if (type === "cos") {
+
+        result = Math.cos(radians);
+
+    }
+
+    else {
+
+        result = Math.tan(radians);
+
+    }
+
+    result = Number(result.toFixed(10));
+
+    display.value = result;
+
+    addHistory(type + "(" + value + ") = " + result);
+
+}
+
+
+function logValue() {
+
+    let value = Number(display.value);
+
+    if (value <= 0) {
+
+        display.value = "Error";
+
+        return;
+
+    }
+
+    let result = Math.log10(value);
+
+    display.value = formatResult(result);
+
+    addHistory("log(" + value + ") = " + display.value);
+
+}
+
+
+function lnValue() {
+
+    let value = Number(display.value);
+
+    if (value <= 0) {
+
+        display.value = "Error";
+
+        return;
+
+    }
+
+    let result = Math.log(value);
+
+    display.value = formatResult(result);
+
+    addHistory("ln(" + value + ") = " + display.value);
+
+}
+
+
+/* =========================
+   FORMAT
+========================= */
+
+function formatResult(value) {
+
+    return Number(value.toFixed(10));
+
+}
+
+
+/* =========================
+   SCIENTIFIC TOGGLE
+========================= */
+
+function toggleScientific() {
+
+    const scientific =
+        document.getElementById("scientific");
+
+    scientific.classList.toggle("active");
+
+}
+
+
+/* =========================
+   HISTORY
+========================= */
+
+function addHistory(text) {
+
+    history.unshift(text);
+
+    if (history.length > 50) {
+
+        history.pop();
+
+    }
+
+    updateHistory();
+
+}
+
+
+function updateHistory() {
+
+    if (history.length === 0) {
+
+        historyList.innerHTML =
+            "No calculations yet.";
+
+        return;
+
+    }
+
+    historyList.innerHTML = "";
+
+    history.forEach(item => {
+
+        const div =
+            document.createElement("div");
+
+        div.className = "history-item";
+
+        div.textContent = item;
+
+        historyList.appendChild(div);
+
+    });
+
+}
+
+
+function toggleHistory() {
+
+    document
+        .getElementById("history")
+        .classList.toggle("active");
+
+}
+
+
+function clearHistory() {
+
+    history = [];
+
+    updateHistory();
+
+}
+
+
+/* =========================
+   SAVE HISTORY
+========================= */
+
+function saveHistory() {
+
+    if (history.length === 0) {
+
+        alert("No history to save.");
+
+        return;
+
+    }
+
+    const text =
+        "Hello Kitty Calculator History\n\n" +
+        history.join("\n");
+
+    const blob =
+        new Blob([text], {
+            type: "text/plain"
+        });
+
+    const url =
+        URL.createObjectURL(blob);
+
+    const link =
+        document.createElement("a");
+
+    link.href = url;
+
+    link.download =
+        "calculator-history.txt";
+
+    link.click();
+
+    URL.revokeObjectURL(url);
+
+}
+
+
+/* =========================
+   MEMORY
+========================= */
+
+function memoryClear() {
+
+    memory = 0;
+
+}
+
+
+function memoryRecall() {
+
+    display.value = memory;
+
+}
+
+
+function memoryAdd() {
+
+    memory += Number(display.value || 0);
+
+}
+
+
+function memorySubtract() {
+
+    memory -= Number(display.value || 0);
+
+}
+
+
+/* =========================
+   DARK MODE
+========================= */
+
+function toggleDarkMode() {
+
+    document.body.classList.toggle("dark");
+
+}
+
+
+/* =========================
+   ABOUT
+========================= */
+
+function showAbout() {
+
+    alert(
+        "🎀 Hello Kitty Scientific Calculator\n\n" +
+        "Version 2.0\n\n" +
+        "Built using HTML, CSS & JavaScript\n\n" +
+        "Developed by Lagnajita Das"
+    );
+
+}
+
+
+/* =========================
+   DATE & TIME
+========================= */
+
+function updateDateTime() {
+
+    const now = new Date();
+
+    document.getElementById("dateTime").textContent =
+        now.toLocaleDateString() +
+        " | " +
+        now.toLocaleTimeString();
+
+}
+
+setInterval(updateDateTime, 1000);
+
+updateDateTime();
+
+
+/* =========================
+   KEYBOARD SUPPORT
+========================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        const key = event.key;
+
+        if (
+            (key >= "0" && key <= "9") ||
+            key === "+" ||
+            key === "-" ||
+            key === "*" ||
+            key === "/" ||
+            key === "."
+        ) {
+
+            appendValue(key);
+
+        }
+
+        else if (key === "Enter") {
+
+            calculate();
+
+        }
+
+        else if (key === "Backspace") {
+
+            deleteLast();
+
+        }
+
+        else if (key === "Escape") {
+
+            clearDisplay();
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>
